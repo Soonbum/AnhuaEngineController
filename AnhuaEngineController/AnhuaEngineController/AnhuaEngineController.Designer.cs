@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            ButtonConnect = new Button();
+            ButtonAutoConnect = new Button();
             ButtonPowerOn = new Button();
             ButtonPowerOff = new Button();
             ButtonLEDOff = new Button();
@@ -53,17 +53,19 @@
             ButtonGetVersion = new Button();
             RichTextBoxLog = new RichTextBox();
             LabelPort = new Label();
+            ButtonConnect = new Button();
+            ComboBoxPorts = new ComboBox();
             SuspendLayout();
             // 
-            // ButtonConnect
+            // ButtonAutoConnect
             // 
-            ButtonConnect.Location = new Point(30, 14);
-            ButtonConnect.Name = "ButtonConnect";
-            ButtonConnect.Size = new Size(104, 34);
-            ButtonConnect.TabIndex = 6;
-            ButtonConnect.Text = "Connect";
-            ButtonConnect.UseVisualStyleBackColor = true;
-            ButtonConnect.Click += ButtonConnect_Click;
+            ButtonAutoConnect.Location = new Point(30, 14);
+            ButtonAutoConnect.Name = "ButtonAutoConnect";
+            ButtonAutoConnect.Size = new Size(104, 34);
+            ButtonAutoConnect.TabIndex = 6;
+            ButtonAutoConnect.Text = "Auto Connect";
+            ButtonAutoConnect.UseVisualStyleBackColor = true;
+            ButtonAutoConnect.Click += ButtonAutoConnect_Click;
             // 
             // ButtonPowerOn
             // 
@@ -280,11 +282,31 @@
             LabelPort.TabIndex = 32;
             LabelPort.Text = "Port";
             // 
+            // ButtonConnect
+            // 
+            ButtonConnect.Location = new Point(30, 54);
+            ButtonConnect.Name = "ButtonConnect";
+            ButtonConnect.Size = new Size(104, 34);
+            ButtonConnect.TabIndex = 33;
+            ButtonConnect.Text = "Connect";
+            ButtonConnect.UseVisualStyleBackColor = true;
+            ButtonConnect.Click += ButtonConnect_Click;
+            // 
+            // ComboBoxPorts
+            // 
+            ComboBoxPorts.FormattingEnabled = true;
+            ComboBoxPorts.Location = new Point(150, 61);
+            ComboBoxPorts.Name = "ComboBoxPorts";
+            ComboBoxPorts.Size = new Size(101, 23);
+            ComboBoxPorts.TabIndex = 34;
+            // 
             // AnhuaEngineController
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(501, 653);
+            Controls.Add(ComboBoxPorts);
+            Controls.Add(ButtonConnect);
             Controls.Add(LabelPort);
             Controls.Add(RichTextBoxLog);
             Controls.Add(LabelPWM);
@@ -309,7 +331,7 @@
             Controls.Add(ButtonLEDOn);
             Controls.Add(ButtonPowerOff);
             Controls.Add(ButtonPowerOn);
-            Controls.Add(ButtonConnect);
+            Controls.Add(ButtonAutoConnect);
             Name = "AnhuaEngineController";
             Text = "AnhuaEngineController";
             ResumeLayout(false);
@@ -317,7 +339,7 @@
         }
 
         #endregion
-        private Button ButtonConnect;
+        private Button ButtonAutoConnect;
         private Button ButtonPowerOn;
         private Button ButtonPowerOff;
         private Button ButtonLEDOff;
@@ -342,5 +364,7 @@
         private Button ButtonGetVersion;
         private RichTextBox RichTextBoxLog;
         private Label LabelPort;
+        private Button ButtonConnect;
+        private ComboBox ComboBoxPorts;
     }
 }

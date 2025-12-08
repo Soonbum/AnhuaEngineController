@@ -14,6 +14,17 @@ public partial class AnhuaEngineController : Form
     public AnhuaEngineController()
     {
         InitializeComponent();
+        RefreshPorts();
+    }
+
+    private void RefreshPorts()
+    {
+        ComboBoxPorts.Items.Clear();
+        string[] ports = SerialPort.GetPortNames();
+        Array.Sort(ports);
+        ComboBoxPorts.Items.AddRange(ports);
+        if (ports.Length > 0)
+            ComboBoxPorts.SelectedIndex = 0;
     }
 
     private void Log(string msg)
@@ -21,10 +32,10 @@ public partial class AnhuaEngineController : Form
         RichTextBoxLog.AppendText($"[{DateTime.Now:HH:mm:ss}] {msg}{Environment.NewLine}");
     }
 
-    private void ButtonConnect_Click(object sender, EventArgs e)
+    private void ButtonAutoConnect_Click(object sender, EventArgs e)
     {
-        ButtonConnect.Enabled = false;
-        ButtonConnect.Text = "Scanning...";
+        ButtonAutoConnect.Enabled = false;
+        ButtonAutoConnect.Text = "Scanning...";
         Cursor.Current = Cursors.WaitCursor; // 모래시계 커서
 
         // 비동기처럼 보이기 위해 UI 갱신을 잠시 허용 (간단한 방식)
@@ -34,8 +45,8 @@ public partial class AnhuaEngineController : Form
         string foundPort = engine.FindPort();
 
         Cursor.Current = Cursors.Default;
-        ButtonConnect.Enabled = true;
-        ButtonConnect.Text = "Auto Connect";
+        ButtonAutoConnect.Enabled = true;
+        ButtonAutoConnect.Text = "Auto Connect";
 
         // 포트를 찾은 경우
         if (foundPort != null)
@@ -45,8 +56,8 @@ public partial class AnhuaEngineController : Form
             if (engine.Connect(foundPort))
             {
                 MessageBox.Show($"Device found on {foundPort} and connected!", "Success");
-                ButtonConnect.Text = "Disconnect";
-                ButtonConnect.BackColor = Color.LightGreen;
+                ButtonAutoConnect.Text = "Disconnect";
+                ButtonAutoConnect.BackColor = Color.LightGreen;
 
                 // (선택) 연결 되자마자 상태 한번 읽어오기
                 // Log("Status: " + _engine.GetLedState());
@@ -59,6 +70,28 @@ public partial class AnhuaEngineController : Form
         else
         {
             MessageBox.Show("Anhua UV Engine not found.\nPlease check USB connection and power.", "Not Found");
+        }
+    }
+
+    private void ButtonConnect_Click(object sender, EventArgs e)
+    {
+        if (ComboBoxPorts.SelectedItem == null) return;
+
+        if (!engine.IsConnected)
+        {
+            if (engine.Connect(ComboBoxPorts.SelectedItem.ToString()))
+            {
+                ButtonConnect.Text = "Disconnect";
+                ButtonConnect.BackColor = Color.LightGreen;
+                Log("Connected to " + ComboBoxPorts.SelectedItem);
+            }
+        }
+        else
+        {
+            engine.Disconnect();
+            ButtonConnect.Text = "Connect";
+            ButtonConnect.BackColor = SystemColors.Control;
+            Log("Disconnected");
         }
     }
 
