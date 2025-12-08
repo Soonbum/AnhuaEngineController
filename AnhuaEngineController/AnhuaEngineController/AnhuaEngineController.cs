@@ -34,6 +34,16 @@ public partial class AnhuaEngineController : Form
 
     private void ButtonAutoConnect_Click(object sender, EventArgs e)
     {
+        // 이미 연결된 포트가 있는 경우, 연결 해제
+        if (engine.CurrentPort != "NoSerialPort")
+        {
+            engine.Disconnect();
+            ButtonAutoConnect.Text = "Auto Connect";
+            ButtonAutoConnect.BackColor = SystemColors.Control;
+            Log("Disconnected");
+            return;
+        }
+
         ButtonAutoConnect.Enabled = false;
         ButtonAutoConnect.Text = "Scanning...";
         Cursor.Current = Cursors.WaitCursor; // 모래시계 커서
@@ -58,9 +68,6 @@ public partial class AnhuaEngineController : Form
                 MessageBox.Show($"Device found on {foundPort} and connected!", "Success");
                 ButtonAutoConnect.Text = "Disconnect";
                 ButtonAutoConnect.BackColor = Color.LightGreen;
-
-                // (선택) 연결 되자마자 상태 한번 읽어오기
-                // Log("Status: " + _engine.GetLedState());
             }
             else
             {
@@ -97,46 +104,41 @@ public partial class AnhuaEngineController : Form
 
     private void ButtonPowerOn_Click(object sender, EventArgs e)
     {
-        engine.PowerOn();
-        Log("Power ON Sent");
+        string returnString = engine.ProjectorOnOff(true);
+        Log($"Power ON Sent: {returnString}");
     }
 
     private void ButtonPowerOff_Click(object sender, EventArgs e)
     {
-        engine.PowerOff();
-        Log("Power OFF Sent");
+        string returnString = engine.ProjectorOnOff(false);
+        Log($"Power OFF Sent: {returnString}");
     }
 
     private void ButtonLEDOn_Click(object sender, EventArgs e)
     {
-        engine.LedOn();
+        engine.LEDOnOff(true);
         Log("LED ON Sent");
     }
 
     private void ButtonLEDOff_Click(object sender, EventArgs e)
     {
-        engine.LedOff();
+        engine.LEDOnOff(false);
         Log("LED OFF Sent");
     }
 
     private void ButtonSetCurrent_Click(object sender, EventArgs e)
     {
-        if (int.TryParse(TextBoxR.Text, out int r) && int.TryParse(TextBoxG.Text, out int g) && int.TryParse(TextBoxB.Text, out int b))
-        {
-            engine.SetCurrent(r, g, b);
-            Log($"Set Current: R{r} G{g} B{b}");
-        }
+        if (int.TryParse(TextBoxCurrent.Text, out int current))
+            engine.SetLEDCurrent(current);
         else
-        {
-            MessageBox.Show("숫자만 입력하세요 (0~874)");
-        }
+            MessageBox.Show("숫자만 입력하세요 (0~1023)");
     }
 
     private void ButtonSetFanSpeed1_Click(object sender, EventArgs e)
     {
         if (int.TryParse(TextBoxFanSpeed1.Text, out int s))
         {
-            engine.SetFan1(s); Log($"Set Fan1: {s}%");
+            engine.SetFanSpeed(1, s); Log($"Set Fan1: {s}%");
         }
     }
 
@@ -144,46 +146,33 @@ public partial class AnhuaEngineController : Form
     {
         if (int.TryParse(TextBoxFanSpeed2.Text, out int s))
         {
-            engine.SetFan2(s); Log($"Set Fan2: {s}%");
+            engine.SetFanSpeed(2, s); Log($"Set Fan1: {s}%");
+        }
+    }
+
+    private void ButtonSetFanSpeed3_Click(object sender, EventArgs e)
+    {
+        if (int.TryParse(TextBoxFanSpeed3.Text, out int s))
+        {
+            engine.SetFanSpeed(3, s); Log($"Set Fan1: {s}%");
         }
     }
 
     private void ButtonSetRotation_Click(object sender, EventArgs e)
     {
-        int.TryParse(TextBoxRotation.Text, out int mode);
-        if (mode >= 0 && mode <= 3)
+        if (int.TryParse(TextBoxRotation.Text, out int mode))
         {
-            engine.SetRotation(mode);
-            Log($"Set Rotation Mode: {mode}");
+            if (mode >= 0 && mode <= 3)
+            {
+                engine.SetFlipPicture(mode);
+                Log($"Set Rotation Mode: {mode}");
+            }
         }
     }
 
-    private void ButtonGetTemperature_Click(object sender, EventArgs e)
+    private void ButtonLogClear_Click(object sender, EventArgs e)
     {
-        string val = engine.GetTemperature();
-        LabelTemperature.Text = val;
-        Log($"Temp: {val}");
-    }
-
-    private void ButtonGetVersion_Click(object sender, EventArgs e)
-    {
-        string val = engine.GetVersion();
-        LabelVersion.Text = val;
-        Log($"Ver: {val}");
-    }
-
-    private void ButtonGetTime_Click(object sender, EventArgs e)
-    {
-        string val = engine.GetWorkingTime();
-        LabelTime.Text = val;
-        Log($"Time: {val}");
-    }
-
-    private void ButtonGetPWM_Click(object sender, EventArgs e)
-    {
-        string val = engine.GetPWM();
-        LabelPWM.Text = val;
-        Log($"PWM: {val}");
+        RichTextBoxLog.Clear();
     }
 }
 
@@ -197,66 +186,59 @@ public class AnhuaEngine
     }
 
     public bool IsConnected => serialPort.IsOpen;
-    public string CurrentPort => serialPort.PortName;
+    public string CurrentPort => (serialPort != null && serialPort.IsOpen) ? serialPort.PortName : "NoSerialPort";
 
     public string FindPort()
     {
         string[] ports = SerialPort.GetPortNames();
 
-        // 포트가 없으면 즉시 종료
+        // 포트가 하나도 없으면 null 반환
         if (ports.Length == 0) return null;
 
-        foreach (string port in ports)
+        foreach (var port in ports)
         {
-            // 이미 메인 포트가 열려있고 그게 이 포트라면 건너뜀 (선택 사항)
+            // 이미 연결된 포트는 건너뜀
             if (serialPort.IsOpen && serialPort.PortName == port) continue;
 
-            SerialPort testPort = new(port, 9600, Parity.None, 8, StopBits.One)
-            {
-                ReadTimeout = 200, // 스캔 속도를 위해 타임아웃을 짧게 설정 (0.2초)
-                WriteTimeout = 200
-            };
-
+            SerialPort testPort = null;
             try
             {
+                testPort = new SerialPort(port, 9600);
+                testPort.ReadTimeout = 5000;
+                testPort.WriteTimeout = 500;
                 testPort.Open();
+                testPort.DiscardInBuffer(); // 기존 잡동사니 데이터 비우기
 
-                // 상태 확인 명령어 전송 (Ping)
-                // Command query: 0x2A 0x53 0x0D
-                byte[] pingCmd = [0x2A, 0x53, 0x0D];
-                testPort.DiscardInBuffer();
-                testPort.Write(pingCmd, 0, pingCmd.Length);
+                // 연결하자마자 Power On 명령을 내림 (정상이면 OK 문자열 올 것)
+                testPort.Write("CM+PWRE=1\r\n");
 
-                // 응답 대기
-                Thread.Sleep(100); // 데이터 수신 대기
+                // 데이터 수신 대기 (약간의 딜레이 필요)
+                System.Threading.Thread.Sleep(1000);
 
-                if (testPort.BytesToRead >= 3) // 최소 3바이트 이상 응답이 와야 함
+                string response = testPort.ReadExisting();
+
+                // 디버깅용: 실제 어떤 응답이 오는지 콘솔에 출력해 보세요.
+                Console.WriteLine($"Port {port} Response: {response}");
+
+                if (response.Contains("OK"))
                 {
-                    byte[] buffer = new byte[testPort.BytesToRead];
-                    testPort.Read(buffer, 0, buffer.Length);
-
-                    // 유효성 검사
-                    // 올바른 응답은 0x2A로 시작해야 함 
-                    // 응답 예시: 0x2A 0x4B...(ON) or 0x2A 0x47...(OFF)
-                    if (buffer[0] == 0x2A && (buffer[1] == 0x4B || buffer[1] == 0x47))
-                    {
-                        testPort.Close();
-                        return port; // 포트 발견
-                    }
+                    // 어떤 응답이라도 온다는 것은 9600bps로 통신하는 장비라는 뜻입니다.
+                    // 더 정확히 하려면 if (response.Contains("ERROR")) 로 변경하세요.
+                    testPort.Close();
+                    return port;
                 }
             }
             catch
             {
-                // 열기 실패하거나 타임아웃 등 오류 발생 시 무시하고 다음 포트로
+                // 포트 열기 실패 또는 타임아웃 시 무시
             }
             finally
             {
-                if (testPort.IsOpen) testPort.Close();
-                testPort.Dispose(); // 리소스 해제
+                if (testPort != null && testPort.IsOpen)
+                    testPort.Close();
             }
         }
-
-        return null; // 모든 포트를 뒤져도 못 찾음
+        return null;
     }
 
     public bool Connect(string portName)
@@ -278,165 +260,96 @@ public class AnhuaEngine
 
     public void Disconnect()
     {
-        if (serialPort.IsOpen) serialPort.Close();
+        if (serialPort.IsOpen)
+        {
+            serialPort.Close();
+            serialPort.PortName = "NoSerialPort";
+        }
     }
 
-    // 공통 송수신 함수
-    private byte[] SendAndReceive(byte[] command, int expectedResponseLength)
+    private string SendCommand(string cmd, bool waitForReturn)
     {
-        if (!serialPort.IsOpen) return null;
+        if (!serialPort.IsOpen) return "Error: Port Closed";
 
-        // 버퍼 비우기
-        serialPort.DiscardInBuffer();
-        serialPort.DiscardOutBuffer();
-        
-        // 전송
-        serialPort.Write(command, 0, command.Length);
-
-        // 응답 대기 (간단한 동기 방식)
         try
         {
-            // 데이터가 들어올 때까지 잠시 대기
-            int timeout = 0;
-            while (serialPort.BytesToRead < expectedResponseLength && timeout < 10)
-            {
-                Thread.Sleep(50);
-                timeout++;
-            }
+            // C++ 코드: fullCmd = cmd + "\r\n";
+            string fullCmd = cmd + "\r\n";
 
-            if (serialPort.BytesToRead > 0)
-            {
-                int bytesToRead = serialPort.BytesToRead;
-                byte[] buffer = new byte[bytesToRead];
-                serialPort.Read(buffer, 0, bytesToRead);
-                return buffer;
-            }
+            // 전송
+            serialPort.Write(fullCmd);
+            Console.WriteLine($"[TX] {fullCmd.Trim()}"); // 디버깅용 로그
+
+            if (!waitForReturn) return "Sent";
+
+            // 응답 대기 (C++ 코드의 waitForReadyRead 로직 구현)
+            // C++은 OK 또는 ERROR를 기다립니다.
+            // 여기서는 간단히 0.5초 대기 후 버퍼를 읽습니다.
+            Thread.Sleep(500);
+
+            string response = serialPort.ReadExisting();
+            Console.WriteLine($"[RX] {response.Trim()}");
+
+            return response.Trim();
         }
-        catch { }
-        return null;
-    }
-
-    public void PowerOn() => SendAndReceive([0x2A, 0xFA, 0x0D], 0);
-
-    public void PowerOff() => SendAndReceive([0x2A, 0xFB, 0x0D], 0);
-
-    public void LedOn() => SendAndReceive([0x2A, 0x4B, 0x0D], 0);
-
-    public void LedOff() => SendAndReceive([0x2A, 0x47, 0x0D], 0);
-
-    public void ResetWorkingTime() => SendAndReceive([0x2A, 0xFE, 0x0D], 0);
-
-    // Save current & rotation state
-    public void SaveConfiguration() => SendAndReceive([0x2A, 0xFC, 0x0D], 0);
-
-    // Command query (Check LED State)
-    public string GetLedState()
-    {
-        byte[] response = SendAndReceive([0x2A, 0x53, 0x0D], 4);
-        if (response != null && response.Length >= 2)
+        catch (Exception ex)
         {
-            if (response[1] == 0x4B) return "LED ON";
-            if (response[1] == 0x47) return "LED OFF";
+            return $"Error: {ex.Message}";
         }
-        return "Unknown";
     }
 
-    // Engine Current Change (DLPC6540 Protocol) - Range 0 ~ 874
-    public void SetCurrent(int r, int g, int b)
+    // 1. Projector On/Off
+    // C++: QString("CM+PWRE=%1").arg(projectorEnable ? 1 : 0)
+    public string ProjectorOnOff(bool enable)
     {
-        r = Math.Max(0, Math.Min(874, r));
-        g = Math.Max(0, Math.Min(874, g));
-        b = Math.Max(0, Math.Min(874, b));
-
-        byte r_l = (byte)(r & 0xFF); byte r_m = (byte)((r >> 8) & 0xFF);
-        byte g_l = (byte)(g & 0xFF); byte g_m = (byte)((g >> 8) & 0xFF);
-        byte b_l = (byte)(b & 0xFF); byte b_m = (byte)((b >> 8) & 0xFF);
-
-        // Header(0x55) + Len(0x07) + Cmd(0x84) + Data(6 bytes) + Checksum
-        List<byte> packet = [0x55, 0x07, 0x84, r_l, r_m, g_l, g_m, b_l, b_m];
-
-        // Checksum Formula[cite: 228]: ~(Sum & 0xFF)
-        int sum = 0;
-        foreach (byte val in packet) sum += val;
-        // *주의: Header(0x55)는 체크섬 계산에 포함되는지 사양서 4.1 공식 확인 필요.
-        // 사양서 224줄 예시 코드를 보면 USART_RX_BUF 전체를 더합니다.
-        // 즉, 패킷의 모든 바이트 합계의 반전입니다.
-
-        byte checksum = (byte)(~(sum & 0xFF));
-        packet.Add(checksum);
-
-        SendAndReceive([.. packet], 0);
+        int val = enable ? 1 : 0;
+        string cmd = $"CM+PWRE={val}";
+        // C++에서 이 명령만 waitForReturn을 true로 썼으므로 응답을 확인합니다.
+        return SendCommand(cmd, true);  // OK 또는 ERROR 반환 기대
     }
 
-    // LED Temperature
-    public string GetTemperature()
+    // 2. LED On/Off
+    // C++: QString("CM+LEDE=%1").arg(LEDEnable ? 1 : 0)
+    public void LEDOnOff(bool enable)
     {
-        byte[] res = SendAndReceive([0x2A, 0x4E, 0x0D], 4);
-        // Feedback: 0x2A 0x4E 0xXX 0x0D
-        if (res != null && res.Length >= 3 && res[1] == 0x4E)
-        {
-            return $"{res[2]} °C";
-        }
-        return "Error";
+        int val = enable ? 1 : 0;
+        string cmd = $"CM+LEDE={val}";
+        SendCommand(cmd, false);        // 반환값 없음
     }
 
-    // Get LED working time
-    public string GetWorkingTime()
+    // 3. Set LED Current (밝기)
+    // C++: QString("CM+LEDS=%1").arg(iBrightness, 4, 10, QChar('0'))
+    // 4자리 숫자로 맞추고 빈 곳은 0으로 채움 (예: 50 -> 0050)
+    public void SetLEDCurrent(int brightness)
     {
-        byte[] res = SendAndReceive([0x2A, 0x4F, 0x0D], 5);
-        // Feedback: 0x2A 0x4F 0xAA 0xXX 0x0D (Low, High)
-        if (res != null && res.Length >= 4 && res[1] == 0x4F)
-        {
-            int time = res[2] + (res[3] << 8); // Lower + Upper
-            return $"{time} Hours";
-        }
-        return "Error";
+        // Clamp (0 ~ 1023)
+        int val = Math.Max(0, Math.Min(1023, brightness));
+
+        // C# 포맷팅: "D4"는 10진수 4자리를 의미 (0050)
+        string cmd = $"CM+LEDS={val:D4}";
+        SendCommand(cmd, false);        // 반환값 없음
     }
 
-    // Get Software Version
-    public string GetVersion()
+    // 4. Set Fan Speed
+    // C++: QString("CM+FAN%1=%2").arg(iFanNo).arg(iSpeed, 3, 10, QChar('0'))
+    // 팬 번호는 그대로, 속도는 3자리 0 채움 (예: 100 -> 100, 50 -> 050)
+    public void SetFanSpeed(int fanNo, int speed)
     {
-        byte[] res = SendAndReceive([0x2A, 0xF5, 0x0D], 10);
-        if (res != null && res.Length > 2)
-        {
-            // ASCII String 변환
-            return Encoding.ASCII.GetString(res).Trim();
-        }
-        return "Error";
+        if (fanNo < 1 || fanNo > 3) return; // 팬 번호 유효성 검사
+
+        // Clamp (0 ~ 100)
+        int val = Math.Max(0, Math.Min(100, speed));
+
+        // "D3"는 10진수 3자리 (050)
+        string cmd = $"CM+FAN{fanNo}={val:D3}";
+        SendCommand(cmd, false);        // 반환값 없음
     }
 
-    // Set FAN 1 Speed
-    public void SetFan1(int speed)
+    // 5. Flip Picture (화면 뒤집기)
+    // C++: QString("CM+SPJF=%1").arg(iFlipCommand)
+    public void SetFlipPicture(int flipCommand)
     {
-        byte val = (byte)Math.Max(0, Math.Min(100, speed)); // 0-100%
-        SendAndReceive([0x2A, 0xEE, val], 0);
-    }
-
-    // Set FAN 2 Speed
-    public void SetFan2(int speed)
-    {
-        byte val = (byte)Math.Max(0, Math.Min(100, speed)); // 0-100%
-        SendAndReceive([0x2A, 0xEF, val], 0);
-    }
-
-    // Set Screen Rotation
-    public void SetRotation(int mode)
-    {
-        // Mode: "00: Normal", "01: 90 Deg", "02: 180 Deg", "03: 270 Deg"
-        byte val = (byte)Math.Max(0, Math.Min(3, mode));
-        SendAndReceive([0x2A, 0xF6, val], 0);
-    }
-
-    // Read PWM Value
-    public string GetPWM()
-    {
-        byte[] res = SendAndReceive([0x2A, 0x54, 0x0D], 5);
-        // Feedback: 0x2A 0x54 High Low 0x0D
-        if (res != null && res.Length >= 4 && res[1] == 0x54)
-        {
-            int pwm = res[3] + (res[2] << 8); // 주의: 상위 바이트가 먼저 옴(PWM_H, PWM_L)
-            return pwm.ToString();
-        }
-        return "Error";
+        string cmd = $"CM+SPJF={flipCommand}";
+        SendCommand(cmd, false);        // 반환값 없음
     }
 }

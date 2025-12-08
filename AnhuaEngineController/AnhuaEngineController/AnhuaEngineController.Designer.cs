@@ -34,27 +34,20 @@
             ButtonLEDOff = new Button();
             ButtonLEDOn = new Button();
             ButtonSetCurrent = new Button();
-            TextBoxR = new TextBox();
-            TextBoxG = new TextBox();
-            TextBoxB = new TextBox();
+            TextBoxCurrent = new TextBox();
             ButtonSetFanSpeed1 = new Button();
             ButtonSetFanSpeed2 = new Button();
             TextBoxFanSpeed1 = new TextBox();
             TextBoxFanSpeed2 = new TextBox();
             TextBoxRotation = new TextBox();
             ButtonSetRotation = new Button();
-            ButtonGetTemperature = new Button();
-            LabelTemperature = new Label();
-            LabelTime = new Label();
-            ButtonGetTime = new Button();
-            LabelPWM = new Label();
-            ButtonGetPWM = new Button();
-            LabelVersion = new Label();
-            ButtonGetVersion = new Button();
             RichTextBoxLog = new RichTextBox();
             LabelPort = new Label();
             ButtonConnect = new Button();
             ComboBoxPorts = new ComboBox();
+            TextBoxFanSpeed3 = new TextBox();
+            ButtonSetFanSpeed3 = new Button();
+            ButtonLogClear = new Button();
             SuspendLayout();
             // 
             // ButtonAutoConnect
@@ -71,7 +64,7 @@
             // 
             ButtonPowerOn.Location = new Point(277, 14);
             ButtonPowerOn.Name = "ButtonPowerOn";
-            ButtonPowerOn.Size = new Size(84, 34);
+            ButtonPowerOn.Size = new Size(101, 34);
             ButtonPowerOn.TabIndex = 7;
             ButtonPowerOn.Text = "Power On";
             ButtonPowerOn.UseVisualStyleBackColor = true;
@@ -81,7 +74,7 @@
             // 
             ButtonPowerOff.Location = new Point(277, 54);
             ButtonPowerOff.Name = "ButtonPowerOff";
-            ButtonPowerOff.Size = new Size(84, 34);
+            ButtonPowerOff.Size = new Size(101, 34);
             ButtonPowerOff.TabIndex = 8;
             ButtonPowerOff.Text = "Power Off";
             ButtonPowerOff.UseVisualStyleBackColor = true;
@@ -89,9 +82,9 @@
             // 
             // ButtonLEDOff
             // 
-            ButtonLEDOff.Location = new Point(378, 54);
+            ButtonLEDOff.Location = new Point(392, 54);
             ButtonLEDOff.Name = "ButtonLEDOff";
-            ButtonLEDOff.Size = new Size(84, 34);
+            ButtonLEDOff.Size = new Size(101, 34);
             ButtonLEDOff.TabIndex = 10;
             ButtonLEDOff.Text = "LED Off";
             ButtonLEDOff.UseVisualStyleBackColor = true;
@@ -99,9 +92,9 @@
             // 
             // ButtonLEDOn
             // 
-            ButtonLEDOn.Location = new Point(378, 14);
+            ButtonLEDOn.Location = new Point(392, 14);
             ButtonLEDOn.Name = "ButtonLEDOn";
-            ButtonLEDOn.Size = new Size(84, 34);
+            ButtonLEDOn.Size = new Size(101, 34);
             ButtonLEDOn.TabIndex = 9;
             ButtonLEDOn.Text = "LED On";
             ButtonLEDOn.UseVisualStyleBackColor = true;
@@ -111,36 +104,23 @@
             // 
             ButtonSetCurrent.Location = new Point(30, 113);
             ButtonSetCurrent.Name = "ButtonSetCurrent";
-            ButtonSetCurrent.Size = new Size(104, 104);
+            ButtonSetCurrent.Size = new Size(104, 46);
             ButtonSetCurrent.TabIndex = 11;
-            ButtonSetCurrent.Text = "Set Current\r\n(R,G,B)\r\n0~874";
+            ButtonSetCurrent.Text = "Set Current\r\n0~1023";
             ButtonSetCurrent.UseVisualStyleBackColor = true;
             ButtonSetCurrent.Click += ButtonSetCurrent_Click;
             // 
-            // TextBoxR
+            // TextBoxCurrent
             // 
-            TextBoxR.Location = new Point(150, 113);
-            TextBoxR.Name = "TextBoxR";
-            TextBoxR.Size = new Size(65, 23);
-            TextBoxR.TabIndex = 12;
-            // 
-            // TextBoxG
-            // 
-            TextBoxG.Location = new Point(150, 155);
-            TextBoxG.Name = "TextBoxG";
-            TextBoxG.Size = new Size(65, 23);
-            TextBoxG.TabIndex = 13;
-            // 
-            // TextBoxB
-            // 
-            TextBoxB.Location = new Point(150, 194);
-            TextBoxB.Name = "TextBoxB";
-            TextBoxB.Size = new Size(65, 23);
-            TextBoxB.TabIndex = 14;
+            TextBoxCurrent.Location = new Point(30, 171);
+            TextBoxCurrent.Name = "TextBoxCurrent";
+            TextBoxCurrent.Size = new Size(101, 23);
+            TextBoxCurrent.TabIndex = 12;
+            TextBoxCurrent.Text = "400";
             // 
             // ButtonSetFanSpeed1
             // 
-            ButtonSetFanSpeed1.Location = new Point(277, 113);
+            ButtonSetFanSpeed1.Location = new Point(139, 113);
             ButtonSetFanSpeed1.Name = "ButtonSetFanSpeed1";
             ButtonSetFanSpeed1.Size = new Size(114, 46);
             ButtonSetFanSpeed1.TabIndex = 15;
@@ -150,7 +130,7 @@
             // 
             // ButtonSetFanSpeed2
             // 
-            ButtonSetFanSpeed2.Location = new Point(277, 171);
+            ButtonSetFanSpeed2.Location = new Point(259, 113);
             ButtonSetFanSpeed2.Name = "ButtonSetFanSpeed2";
             ButtonSetFanSpeed2.Size = new Size(114, 46);
             ButtonSetFanSpeed2.TabIndex = 16;
@@ -160,116 +140,43 @@
             // 
             // TextBoxFanSpeed1
             // 
-            TextBoxFanSpeed1.Location = new Point(397, 126);
+            TextBoxFanSpeed1.Location = new Point(164, 171);
             TextBoxFanSpeed1.Name = "TextBoxFanSpeed1";
             TextBoxFanSpeed1.Size = new Size(65, 23);
             TextBoxFanSpeed1.TabIndex = 17;
+            TextBoxFanSpeed1.Text = "50";
             // 
             // TextBoxFanSpeed2
             // 
-            TextBoxFanSpeed2.Location = new Point(397, 184);
+            TextBoxFanSpeed2.Location = new Point(284, 171);
             TextBoxFanSpeed2.Name = "TextBoxFanSpeed2";
             TextBoxFanSpeed2.Size = new Size(65, 23);
             TextBoxFanSpeed2.TabIndex = 18;
+            TextBoxFanSpeed2.Text = "50";
             // 
             // TextBoxRotation
             // 
-            TextBoxRotation.Location = new Point(397, 254);
+            TextBoxRotation.Location = new Point(428, 254);
             TextBoxRotation.Name = "TextBoxRotation";
             TextBoxRotation.Size = new Size(65, 23);
             TextBoxRotation.TabIndex = 20;
+            TextBoxRotation.Text = "0";
             // 
             // ButtonSetRotation
             // 
             ButtonSetRotation.Location = new Point(30, 241);
             ButtonSetRotation.Name = "ButtonSetRotation";
-            ButtonSetRotation.Size = new Size(361, 46);
+            ButtonSetRotation.Size = new Size(381, 46);
             ButtonSetRotation.TabIndex = 19;
             ButtonSetRotation.Text = "Set Rotation\r\n0 (0), 1 (90), 2 (180), 3 (270)";
             ButtonSetRotation.UseVisualStyleBackColor = true;
             ButtonSetRotation.Click += ButtonSetRotation_Click;
             // 
-            // ButtonGetTemperature
-            // 
-            ButtonGetTemperature.Location = new Point(30, 303);
-            ButtonGetTemperature.Name = "ButtonGetTemperature";
-            ButtonGetTemperature.Size = new Size(114, 46);
-            ButtonGetTemperature.TabIndex = 21;
-            ButtonGetTemperature.Text = "Get Temperature";
-            ButtonGetTemperature.UseVisualStyleBackColor = true;
-            ButtonGetTemperature.Click += ButtonGetTemperature_Click;
-            // 
-            // LabelTemperature
-            // 
-            LabelTemperature.AutoSize = true;
-            LabelTemperature.Location = new Point(150, 319);
-            LabelTemperature.Name = "LabelTemperature";
-            LabelTemperature.Size = new Size(74, 15);
-            LabelTemperature.TabIndex = 22;
-            LabelTemperature.Text = "Temperature";
-            // 
-            // LabelTime
-            // 
-            LabelTime.AutoSize = true;
-            LabelTime.Location = new Point(397, 319);
-            LabelTime.Name = "LabelTime";
-            LabelTime.Size = new Size(33, 15);
-            LabelTime.TabIndex = 24;
-            LabelTime.Text = "Time";
-            // 
-            // ButtonGetTime
-            // 
-            ButtonGetTime.Location = new Point(277, 303);
-            ButtonGetTime.Name = "ButtonGetTime";
-            ButtonGetTime.Size = new Size(114, 46);
-            ButtonGetTime.TabIndex = 23;
-            ButtonGetTime.Text = "Get Time";
-            ButtonGetTime.UseVisualStyleBackColor = true;
-            ButtonGetTime.Click += ButtonGetTime_Click;
-            // 
-            // LabelPWM
-            // 
-            LabelPWM.AutoSize = true;
-            LabelPWM.Location = new Point(397, 382);
-            LabelPWM.Name = "LabelPWM";
-            LabelPWM.Size = new Size(36, 15);
-            LabelPWM.TabIndex = 28;
-            LabelPWM.Text = "PWM";
-            // 
-            // ButtonGetPWM
-            // 
-            ButtonGetPWM.Location = new Point(277, 366);
-            ButtonGetPWM.Name = "ButtonGetPWM";
-            ButtonGetPWM.Size = new Size(114, 46);
-            ButtonGetPWM.TabIndex = 27;
-            ButtonGetPWM.Text = "Get PWM";
-            ButtonGetPWM.UseVisualStyleBackColor = true;
-            ButtonGetPWM.Click += ButtonGetPWM_Click;
-            // 
-            // LabelVersion
-            // 
-            LabelVersion.AutoSize = true;
-            LabelVersion.Location = new Point(150, 382);
-            LabelVersion.Name = "LabelVersion";
-            LabelVersion.Size = new Size(47, 15);
-            LabelVersion.TabIndex = 26;
-            LabelVersion.Text = "Version";
-            // 
-            // ButtonGetVersion
-            // 
-            ButtonGetVersion.Location = new Point(30, 366);
-            ButtonGetVersion.Name = "ButtonGetVersion";
-            ButtonGetVersion.Size = new Size(114, 46);
-            ButtonGetVersion.TabIndex = 25;
-            ButtonGetVersion.Text = "Get Version";
-            ButtonGetVersion.UseVisualStyleBackColor = true;
-            ButtonGetVersion.Click += ButtonGetVersion_Click;
-            // 
             // RichTextBoxLog
             // 
-            RichTextBoxLog.Location = new Point(34, 442);
+            RichTextBoxLog.Location = new Point(34, 307);
             RichTextBoxLog.Name = "RichTextBoxLog";
-            RichTextBoxLog.Size = new Size(428, 187);
+            RichTextBoxLog.Size = new Size(459, 187);
             RichTextBoxLog.TabIndex = 31;
             RichTextBoxLog.Text = "";
             // 
@@ -300,32 +207,53 @@
             ComboBoxPorts.Size = new Size(101, 23);
             ComboBoxPorts.TabIndex = 34;
             // 
+            // TextBoxFanSpeed3
+            // 
+            TextBoxFanSpeed3.Location = new Point(404, 171);
+            TextBoxFanSpeed3.Name = "TextBoxFanSpeed3";
+            TextBoxFanSpeed3.Size = new Size(65, 23);
+            TextBoxFanSpeed3.TabIndex = 36;
+            TextBoxFanSpeed3.Text = "50";
+            // 
+            // ButtonSetFanSpeed3
+            // 
+            ButtonSetFanSpeed3.Location = new Point(379, 113);
+            ButtonSetFanSpeed3.Name = "ButtonSetFanSpeed3";
+            ButtonSetFanSpeed3.Size = new Size(114, 46);
+            ButtonSetFanSpeed3.TabIndex = 35;
+            ButtonSetFanSpeed3.Text = "Set Fan Speed 3\r\n0~100";
+            ButtonSetFanSpeed3.UseVisualStyleBackColor = true;
+            ButtonSetFanSpeed3.Click += ButtonSetFanSpeed3_Click;
+            // 
+            // ButtonLogClear
+            // 
+            ButtonLogClear.Location = new Point(34, 500);
+            ButtonLogClear.Name = "ButtonLogClear";
+            ButtonLogClear.Size = new Size(459, 34);
+            ButtonLogClear.TabIndex = 37;
+            ButtonLogClear.Text = "Clear";
+            ButtonLogClear.UseVisualStyleBackColor = true;
+            ButtonLogClear.Click += ButtonLogClear_Click;
+            // 
             // AnhuaEngineController
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(501, 653);
+            ClientSize = new Size(526, 557);
+            Controls.Add(ButtonLogClear);
+            Controls.Add(TextBoxFanSpeed3);
+            Controls.Add(ButtonSetFanSpeed3);
             Controls.Add(ComboBoxPorts);
             Controls.Add(ButtonConnect);
             Controls.Add(LabelPort);
             Controls.Add(RichTextBoxLog);
-            Controls.Add(LabelPWM);
-            Controls.Add(ButtonGetPWM);
-            Controls.Add(LabelVersion);
-            Controls.Add(ButtonGetVersion);
-            Controls.Add(LabelTime);
-            Controls.Add(ButtonGetTime);
-            Controls.Add(LabelTemperature);
-            Controls.Add(ButtonGetTemperature);
             Controls.Add(TextBoxRotation);
             Controls.Add(ButtonSetRotation);
             Controls.Add(TextBoxFanSpeed2);
             Controls.Add(TextBoxFanSpeed1);
             Controls.Add(ButtonSetFanSpeed2);
             Controls.Add(ButtonSetFanSpeed1);
-            Controls.Add(TextBoxB);
-            Controls.Add(TextBoxG);
-            Controls.Add(TextBoxR);
+            Controls.Add(TextBoxCurrent);
             Controls.Add(ButtonSetCurrent);
             Controls.Add(ButtonLEDOff);
             Controls.Add(ButtonLEDOn);
@@ -345,26 +273,19 @@
         private Button ButtonLEDOff;
         private Button ButtonLEDOn;
         private Button ButtonSetCurrent;
-        private TextBox TextBoxR;
-        private TextBox TextBoxG;
-        private TextBox TextBoxB;
+        private TextBox TextBoxCurrent;
         private Button ButtonSetFanSpeed1;
         private Button ButtonSetFanSpeed2;
         private TextBox TextBoxFanSpeed1;
         private TextBox TextBoxFanSpeed2;
         private TextBox TextBoxRotation;
         private Button ButtonSetRotation;
-        private Button ButtonGetTemperature;
-        private Label LabelTemperature;
-        private Label LabelTime;
-        private Button ButtonGetTime;
-        private Label LabelPWM;
-        private Button ButtonGetPWM;
-        private Label LabelVersion;
-        private Button ButtonGetVersion;
         private RichTextBox RichTextBoxLog;
         private Label LabelPort;
         private Button ButtonConnect;
         private ComboBox ComboBoxPorts;
+        private TextBox TextBoxFanSpeed3;
+        private Button ButtonSetFanSpeed3;
+        private Button ButtonLogClear;
     }
 }
