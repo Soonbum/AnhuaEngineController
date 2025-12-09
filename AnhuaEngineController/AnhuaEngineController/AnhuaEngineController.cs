@@ -151,7 +151,7 @@ public partial class AnhuaEngineController : Form
     {
         if (int.TryParse(TextBoxFanSpeed2.Text, out int s))
         {
-            string returnString = engine.SetFanSpeed(2, s); Log($"Set Fan1: {s}% - {returnString}");
+            string returnString = engine.SetFanSpeed(2, s); Log($"Set Fan2: {s}% - {returnString}");
         }
     }
 
@@ -159,7 +159,7 @@ public partial class AnhuaEngineController : Form
     {
         if (int.TryParse(TextBoxFanSpeed3.Text, out int s))
         {
-            string returnString = engine.SetFanSpeed(3, s); Log($"Set Fan1: {s}% - {returnString}");
+            string returnString = engine.SetFanSpeed(3, s); Log($"Set Fan3: {s}% - {returnString}");
         }
     }
 
