@@ -105,40 +105,45 @@ public partial class AnhuaEngineController : Form
     private void ButtonPowerOn_Click(object sender, EventArgs e)
     {
         string returnString = engine.ProjectorOnOff(true);
-        Log($"Power ON Sent: {returnString}");
+        Log($"Power ON Sent - {returnString}");
     }
 
     private void ButtonPowerOff_Click(object sender, EventArgs e)
     {
         string returnString = engine.ProjectorOnOff(false);
-        Log($"Power OFF Sent: {returnString}");
+        Log($"Power OFF Sent - {returnString}");
     }
 
     private void ButtonLEDOn_Click(object sender, EventArgs e)
     {
-        engine.LEDOnOff(true);
-        Log("LED ON Sent");
+        string returnString = engine.LEDOnOff(true);
+        Log($"LED ON Sent - {returnString}");
     }
 
     private void ButtonLEDOff_Click(object sender, EventArgs e)
     {
-        engine.LEDOnOff(false);
-        Log("LED OFF Sent");
+        string returnString = engine.LEDOnOff(false);
+        Log($"LED OFF Sent - {returnString}");
     }
 
     private void ButtonSetCurrent_Click(object sender, EventArgs e)
     {
         if (int.TryParse(TextBoxCurrent.Text, out int current))
-            engine.SetLEDCurrent(current);
+        {
+            string returnString = engine.SetLEDCurrent(current);
+            Log($"Set Current to {current} - {returnString}");
+        }
         else
+        {
             MessageBox.Show("숫자만 입력하세요 (0~1023)");
+        }
     }
 
     private void ButtonSetFanSpeed1_Click(object sender, EventArgs e)
     {
         if (int.TryParse(TextBoxFanSpeed1.Text, out int s))
         {
-            engine.SetFanSpeed(1, s); Log($"Set Fan1: {s}%");
+            string returnString = engine.SetFanSpeed(1, s); Log($"Set Fan1: {s}% - {returnString}");
         }
     }
 
@@ -146,7 +151,7 @@ public partial class AnhuaEngineController : Form
     {
         if (int.TryParse(TextBoxFanSpeed2.Text, out int s))
         {
-            engine.SetFanSpeed(2, s); Log($"Set Fan1: {s}%");
+            string returnString = engine.SetFanSpeed(2, s); Log($"Set Fan1: {s}% - {returnString}");
         }
     }
 
@@ -154,7 +159,7 @@ public partial class AnhuaEngineController : Form
     {
         if (int.TryParse(TextBoxFanSpeed3.Text, out int s))
         {
-            engine.SetFanSpeed(3, s); Log($"Set Fan1: {s}%");
+            string returnString = engine.SetFanSpeed(3, s); Log($"Set Fan1: {s}% - {returnString}");
         }
     }
 
@@ -164,8 +169,8 @@ public partial class AnhuaEngineController : Form
         {
             if (mode >= 0 && mode <= 3)
             {
-                engine.SetFlipPicture(mode);
-                Log($"Set Rotation Mode: {mode}");
+                string returnString = engine.SetFlipPicture(mode);
+                Log($"Set Rotation Mode: {mode} - {returnString}");
             }
         }
     }
@@ -203,9 +208,11 @@ public class AnhuaEngine
             SerialPort testPort = null;
             try
             {
-                testPort = new SerialPort(port, 9600);
-                testPort.ReadTimeout = 5000;
-                testPort.WriteTimeout = 500;
+                testPort = new(port, 9600)
+                {
+                    ReadTimeout = 5000,
+                    WriteTimeout = 500
+                };
                 testPort.Open();
                 testPort.DiscardInBuffer(); // 기존 잡동사니 데이터 비우기
 
@@ -267,7 +274,7 @@ public class AnhuaEngine
         }
     }
 
-    private string SendCommand(string cmd, bool waitForReturn)
+    private string SendCommand(string cmd)
     {
         if (!serialPort.IsOpen) return "Error: Port Closed";
 
@@ -280,9 +287,6 @@ public class AnhuaEngine
             serialPort.Write(fullCmd);
             Console.WriteLine($"[TX] {fullCmd.Trim()}"); // 디버깅용 로그
 
-            if (!waitForReturn) return "Sent";
-
-            // 응답 대기 (C++ 코드의 waitForReadyRead 로직 구현)
             // C++은 OK 또는 ERROR를 기다립니다.
             // 여기서는 간단히 0.5초 대기 후 버퍼를 읽습니다.
             Thread.Sleep(500);
@@ -304,52 +308,51 @@ public class AnhuaEngine
     {
         int val = enable ? 1 : 0;
         string cmd = $"CM+PWRE={val}";
-        // C++에서 이 명령만 waitForReturn을 true로 썼으므로 응답을 확인합니다.
-        return SendCommand(cmd, true);  // OK 또는 ERROR 반환 기대
+        return SendCommand(cmd);
     }
 
     // 2. LED On/Off
     // C++: QString("CM+LEDE=%1").arg(LEDEnable ? 1 : 0)
-    public void LEDOnOff(bool enable)
+    public string LEDOnOff(bool enable)
     {
         int val = enable ? 1 : 0;
         string cmd = $"CM+LEDE={val}";
-        SendCommand(cmd, false);        // 반환값 없음
+        return SendCommand(cmd);
     }
 
     // 3. Set LED Current (밝기)
     // C++: QString("CM+LEDS=%1").arg(iBrightness, 4, 10, QChar('0'))
     // 4자리 숫자로 맞추고 빈 곳은 0으로 채움 (예: 50 -> 0050)
-    public void SetLEDCurrent(int brightness)
+    public string SetLEDCurrent(int brightness)
     {
         // Clamp (0 ~ 1023)
         int val = Math.Max(0, Math.Min(1023, brightness));
 
         // C# 포맷팅: "D4"는 10진수 4자리를 의미 (0050)
         string cmd = $"CM+LEDS={val:D4}";
-        SendCommand(cmd, false);        // 반환값 없음
+        return SendCommand(cmd);
     }
 
     // 4. Set Fan Speed
     // C++: QString("CM+FAN%1=%2").arg(iFanNo).arg(iSpeed, 3, 10, QChar('0'))
     // 팬 번호는 그대로, 속도는 3자리 0 채움 (예: 100 -> 100, 50 -> 050)
-    public void SetFanSpeed(int fanNo, int speed)
+    public string SetFanSpeed(int fanNo, int speed)
     {
-        if (fanNo < 1 || fanNo > 3) return; // 팬 번호 유효성 검사
+        if (fanNo < 1 || fanNo > 3) return "InvalidFanNo"; // 팬 번호 유효성 검사
 
         // Clamp (0 ~ 100)
         int val = Math.Max(0, Math.Min(100, speed));
 
         // "D3"는 10진수 3자리 (050)
         string cmd = $"CM+FAN{fanNo}={val:D3}";
-        SendCommand(cmd, false);        // 반환값 없음
+        return SendCommand(cmd);
     }
 
     // 5. Flip Picture (화면 뒤집기)
     // C++: QString("CM+SPJF=%1").arg(iFlipCommand)
-    public void SetFlipPicture(int flipCommand)
+    public string SetFlipPicture(int flipCommand)
     {
         string cmd = $"CM+SPJF={flipCommand}";
-        SendCommand(cmd, false);        // 반환값 없음
+        return SendCommand(cmd);
     }
 }
