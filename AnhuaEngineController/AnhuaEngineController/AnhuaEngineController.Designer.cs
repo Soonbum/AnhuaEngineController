@@ -48,6 +48,13 @@
             TextBoxFanSpeed3 = new TextBox();
             ButtonSetFanSpeed3 = new Button();
             ButtonLogClear = new Button();
+            TextBoxPeriod = new TextBox();
+            TextBoxOnTime = new TextBox();
+            LabelPeriod = new Label();
+            LabelOnTime = new Label();
+            ButtonStart = new Button();
+            TestPanel = new Panel();
+            TestPanel.SuspendLayout();
             SuspendLayout();
             // 
             // ButtonAutoConnect
@@ -235,11 +242,66 @@
             ButtonLogClear.UseVisualStyleBackColor = true;
             ButtonLogClear.Click += ButtonLogClear_Click;
             // 
+            // TextBoxPeriod
+            // 
+            TextBoxPeriod.Location = new Point(15, 53);
+            TextBoxPeriod.Name = "TextBoxPeriod";
+            TextBoxPeriod.Size = new Size(100, 23);
+            TextBoxPeriod.TabIndex = 38;
+            // 
+            // TextBoxOnTime
+            // 
+            TextBoxOnTime.Location = new Point(134, 53);
+            TextBoxOnTime.Name = "TextBoxOnTime";
+            TextBoxOnTime.Size = new Size(100, 23);
+            TextBoxOnTime.TabIndex = 39;
+            // 
+            // LabelPeriod
+            // 
+            LabelPeriod.AutoSize = true;
+            LabelPeriod.Location = new Point(36, 26);
+            LabelPeriod.Name = "LabelPeriod";
+            LabelPeriod.Size = new Size(58, 15);
+            LabelPeriod.TabIndex = 40;
+            LabelPeriod.Text = "Period (s)";
+            // 
+            // LabelOnTime
+            // 
+            LabelOnTime.AutoSize = true;
+            LabelOnTime.Location = new Point(151, 26);
+            LabelOnTime.Name = "LabelOnTime";
+            LabelOnTime.Size = new Size(66, 15);
+            LabelOnTime.TabIndex = 41;
+            LabelOnTime.Text = "OnTime (s)";
+            // 
+            // ButtonStart
+            // 
+            ButtonStart.Location = new Point(250, 26);
+            ButtonStart.Name = "ButtonStart";
+            ButtonStart.Size = new Size(195, 50);
+            ButtonStart.TabIndex = 42;
+            ButtonStart.Text = "Start";
+            ButtonStart.UseVisualStyleBackColor = true;
+            ButtonStart.Click += ButtonStart_Click;
+            // 
+            // TestPanel
+            // 
+            TestPanel.Controls.Add(TextBoxPeriod);
+            TestPanel.Controls.Add(ButtonStart);
+            TestPanel.Controls.Add(TextBoxOnTime);
+            TestPanel.Controls.Add(LabelOnTime);
+            TestPanel.Controls.Add(LabelPeriod);
+            TestPanel.Location = new Point(34, 552);
+            TestPanel.Name = "TestPanel";
+            TestPanel.Size = new Size(459, 100);
+            TestPanel.TabIndex = 43;
+            // 
             // AnhuaEngineController
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(526, 557);
+            ClientSize = new Size(526, 682);
+            Controls.Add(TestPanel);
             Controls.Add(ButtonLogClear);
             Controls.Add(TextBoxFanSpeed3);
             Controls.Add(ButtonSetFanSpeed3);
@@ -262,6 +324,8 @@
             Controls.Add(ButtonAutoConnect);
             Name = "AnhuaEngineController";
             Text = "AnhuaEngineController";
+            TestPanel.ResumeLayout(false);
+            TestPanel.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -287,5 +351,11 @@
         private TextBox TextBoxFanSpeed3;
         private Button ButtonSetFanSpeed3;
         private Button ButtonLogClear;
+        private TextBox TextBoxPeriod;
+        private TextBox TextBoxOnTime;
+        private Label LabelPeriod;
+        private Label LabelOnTime;
+        private Button ButtonStart;
+        private Panel TestPanel;
     }
 }

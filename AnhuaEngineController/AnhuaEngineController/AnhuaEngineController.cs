@@ -10,6 +10,8 @@ namespace AnhuaEngineController;
 public partial class AnhuaEngineController : Form
 {
     private AnhuaEngine engine = new();
+    private CancellationTokenSource _cts; // 작업 취소 토큰 소스
+    private bool IsWorkingPeriodOperation = false;      // 현재 작동 중인지 확인하는 플래그
 
     public AnhuaEngineController()
     {
@@ -178,6 +180,95 @@ public partial class AnhuaEngineController : Form
     private void ButtonLogClear_Click(object sender, EventArgs e)
     {
         RichTextBoxLog.Clear();
+    }
+
+    private async void ButtonStart_Click(object sender, EventArgs e)
+    {
+        // 이미 작동 중인 경우 중지(Stop)
+        if (IsWorkingPeriodOperation)
+        {
+            _cts?.Cancel(); // 비동기 작업 취소 요청
+            IsWorkingPeriodOperation = false;
+            ButtonStart.Text = "Start"; // 버튼 텍스트 원상복구
+
+            // 안전을 위해 중지 시 LED를 확실히 끔
+            engine.LEDOnOff(false);
+            return;
+        }
+
+        bool IsValidPeriod = int.TryParse(TextBoxPeriod.Text, out int period);
+        bool IsValidOnTime = int.TryParse(TextBoxOnTime.Text, out int onTime);
+
+        if (!IsValidPeriod)
+        {
+            MessageBox.Show("Period 값이 올바르지 않습니다. 초 단위 정수를 입력하세요.");
+            return;
+        }
+        if (!IsValidOnTime)
+        {
+            MessageBox.Show("On Time 값이 올바르지 않습니다. 초 단위 정수를 입력하세요.");
+            return;
+        }
+        if (!(onTime < period))
+        {
+            MessageBox.Show("On Time 값은 Period 값보다 작아야 합니다.");
+            return;
+        }
+
+        // 시작(Start)
+        IsWorkingPeriodOperation = true;
+        ButtonStart.Text = "Stop"; // 버튼 텍스트를 중지로 변경
+
+        // UI 입력값은 '초' 단위라고 가정하므로 밀리초(ms)로 변환 (필요 시 수정)
+        int periodMs = period * 1000;
+        int onTimeMs = onTime * 1000;
+
+        _cts = new CancellationTokenSource(); // 새로운 취소 토큰 생성
+
+        try
+        {
+            // 별도의 비동기 메서드로 LED 제어 루프 시작
+            await RunLedCycleAsync(periodMs, onTimeMs, _cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            // 취소(Stop)되었을 때 발생하는 예외 무시 (정상 흐름)
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"오류 발생: {ex.Message}");
+        }
+        finally
+        {
+            // 작업이 끝나거나 취소되면 상태 초기화
+            IsWorkingPeriodOperation = false;
+            ButtonStart.Text = "Start";
+            _cts?.Dispose();
+            _cts = null;
+
+            // 루프 종료 후 안전하게 LED 끄기
+            engine.LEDOnOff(false);
+        }
+    }
+
+    // 실제 주기적으로 LED를 켜고 끄는 비동기 메서드
+    private async Task RunLedCycleAsync(int periodMs, int onTimeMs, CancellationToken token)
+    {
+        int offTimeMs = periodMs - onTimeMs;
+
+        // 취소 요청이 들어오기 전까지 무한 반복
+        while (!token.IsCancellationRequested)
+        {
+            // 1. LED 켜기
+            engine.LEDOnOff(true);
+            // On 시간만큼 대기 (취소 토큰 감지 포함)
+            await Task.Delay(onTimeMs, token);
+
+            // 2. LED 끄기
+            engine.LEDOnOff(false);
+            // Off 시간만큼 대기 (취소 토큰 감지 포함)
+            await Task.Delay(offTimeMs, token);
+        }
     }
 }
 
