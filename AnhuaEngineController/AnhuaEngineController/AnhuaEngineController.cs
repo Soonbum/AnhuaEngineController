@@ -9,24 +9,38 @@ namespace AnhuaEngineController;
 
 public partial class AnhuaEngineController : Form
 {
-    private AnhuaEngine engine = new();
+    private AnhuaEngine engine1 = new();
+    private AnhuaEngine engine2 = new();
     private CancellationTokenSource _cts; // 작업 취소 토큰 소스
     private bool IsWorkingPeriodOperation = false;      // 현재 작동 중인지 확인하는 플래그
+
+    private readonly string folderPath;
+    private string filePath = "";
+    private readonly long maxFileSizeInKiloBytes = 4096;
 
     public AnhuaEngineController()
     {
         InitializeComponent();
+
         RefreshPorts();
     }
 
     private void RefreshPorts()
     {
-        ComboBoxPorts.Items.Clear();
+        ComboBoxPorts1.Items.Clear();
+        ComboBoxPorts2.Items.Clear();
+
         string[] ports = SerialPort.GetPortNames();
         Array.Sort(ports);
-        ComboBoxPorts.Items.AddRange(ports);
+
+        ComboBoxPorts1.Items.AddRange(ports);
+        ComboBoxPorts2.Items.AddRange(ports);
+
         if (ports.Length > 0)
-            ComboBoxPorts.SelectedIndex = 0;
+        {
+            ComboBoxPorts1.SelectedIndex = 0;
+            ComboBoxPorts2.SelectedIndex = 0;
+        }
     }
 
     private void Log(string msg)
@@ -34,106 +48,138 @@ public partial class AnhuaEngineController : Form
         RichTextBoxLog.AppendText($"[{DateTime.Now:HH:mm:ss}] {msg}{Environment.NewLine}");
     }
 
-    private void ButtonAutoConnect_Click(object sender, EventArgs e)
+    //private void ButtonAutoConnect_Click(object sender, EventArgs e)
+    //{
+    //    // 이미 연결된 포트가 있는 경우, 연결 해제
+    //    if (engine.CurrentPort != "NoSerialPort")
+    //    {
+    //        engine.Disconnect();
+    //        ButtonAutoConnect.Text = "Auto Connect";
+    //        ButtonAutoConnect.BackColor = SystemColors.Control;
+    //        Log("Disconnected");
+    //        return;
+    //    }
+
+    //    ButtonAutoConnect.Enabled = false;
+    //    ButtonAutoConnect.Text = "Scanning...";
+    //    Cursor.Current = Cursors.WaitCursor; // 모래시계 커서
+
+    //    // 비동기처럼 보이기 위해 UI 갱신을 잠시 허용 (간단한 방식)
+    //    Application.DoEvents();
+
+    //    // 자동 찾기 실행
+    //    string foundPort = engine.FindPort();
+
+    //    Cursor.Current = Cursors.Default;
+    //    ButtonAutoConnect.Enabled = true;
+    //    ButtonAutoConnect.Text = "Auto Connect";
+
+    //    // 포트를 찾은 경우
+    //    if (foundPort != null)
+    //    {
+    //        LabelPort.Text = foundPort;
+
+    //        if (engine.Connect(foundPort))
+    //        {
+    //            MessageBox.Show($"Device found on {foundPort} and connected!", "Success");
+    //            ButtonAutoConnect.Text = "Disconnect";
+    //            ButtonAutoConnect.BackColor = Color.LightGreen;
+    //        }
+    //        else
+    //        {
+    //            MessageBox.Show($"Device found on {foundPort} but failed to connect.", "Error");
+    //        }
+    //    }
+    //    else
+    //    {
+    //        MessageBox.Show("Anhua UV Engine not found.\nPlease check USB connection and power.", "Not Found");
+    //    }
+    //}
+
+    private void ButtonConnect1_Click(object sender, EventArgs e)
     {
-        // 이미 연결된 포트가 있는 경우, 연결 해제
-        if (engine.CurrentPort != "NoSerialPort")
+        if (ComboBoxPorts1.SelectedItem == null) return;
+
+        if (!engine1.IsConnected)
         {
-            engine.Disconnect();
-            ButtonAutoConnect.Text = "Auto Connect";
-            ButtonAutoConnect.BackColor = SystemColors.Control;
-            Log("Disconnected");
-            return;
-        }
-
-        ButtonAutoConnect.Enabled = false;
-        ButtonAutoConnect.Text = "Scanning...";
-        Cursor.Current = Cursors.WaitCursor; // 모래시계 커서
-
-        // 비동기처럼 보이기 위해 UI 갱신을 잠시 허용 (간단한 방식)
-        Application.DoEvents();
-
-        // 자동 찾기 실행
-        string foundPort = engine.FindPort();
-
-        Cursor.Current = Cursors.Default;
-        ButtonAutoConnect.Enabled = true;
-        ButtonAutoConnect.Text = "Auto Connect";
-
-        // 포트를 찾은 경우
-        if (foundPort != null)
-        {
-            LabelPort.Text = foundPort;
-
-            if (engine.Connect(foundPort))
+            if (engine1.Connect(ComboBoxPorts1.SelectedItem.ToString()))
             {
-                MessageBox.Show($"Device found on {foundPort} and connected!", "Success");
-                ButtonAutoConnect.Text = "Disconnect";
-                ButtonAutoConnect.BackColor = Color.LightGreen;
-            }
-            else
-            {
-                MessageBox.Show($"Device found on {foundPort} but failed to connect.", "Error");
+                ButtonConnect1.Text = "Disconnect";
+                ButtonConnect1.BackColor = Color.LightGreen;
+                Log("Connected to " + ComboBoxPorts1.SelectedItem);
             }
         }
         else
         {
-            MessageBox.Show("Anhua UV Engine not found.\nPlease check USB connection and power.", "Not Found");
+            engine1.Disconnect();
+            ButtonConnect1.Text = "Connect";
+            ButtonConnect1.BackColor = SystemColors.Control;
+            Log("Disconnected");
         }
     }
 
-    private void ButtonConnect_Click(object sender, EventArgs e)
+    private void ButtonConnect2_Click(object sender, EventArgs e)
     {
-        if (ComboBoxPorts.SelectedItem == null) return;
+        if (ComboBoxPorts2.SelectedItem == null) return;
 
-        if (!engine.IsConnected)
+        if (!engine2.IsConnected)
         {
-            if (engine.Connect(ComboBoxPorts.SelectedItem.ToString()))
+            if (engine2.Connect(ComboBoxPorts2.SelectedItem.ToString()))
             {
-                ButtonConnect.Text = "Disconnect";
-                ButtonConnect.BackColor = Color.LightGreen;
-                Log("Connected to " + ComboBoxPorts.SelectedItem);
+                ButtonConnect2.Text = "Disconnect";
+                ButtonConnect2.BackColor = Color.LightGreen;
+                Log("Connected to " + ComboBoxPorts2.SelectedItem);
             }
         }
         else
         {
-            engine.Disconnect();
-            ButtonConnect.Text = "Connect";
-            ButtonConnect.BackColor = SystemColors.Control;
+            engine2.Disconnect();
+            ButtonConnect2.Text = "Connect";
+            ButtonConnect2.BackColor = SystemColors.Control;
             Log("Disconnected");
         }
     }
 
     private void ButtonPowerOn_Click(object sender, EventArgs e)
     {
-        string returnString = engine.ProjectorOnOff(true);
-        Log($"Power ON Sent - {returnString}");
+        string returnString1 = engine1.ProjectorOnOff(true);
+        string returnString2 = engine2.ProjectorOnOff(true);
+
+        Log($"Power ON Sent - (1) {returnString1} (2) {returnString2}");
     }
 
     private void ButtonPowerOff_Click(object sender, EventArgs e)
     {
-        string returnString = engine.ProjectorOnOff(false);
-        Log($"Power OFF Sent - {returnString}");
+        string returnString1 = engine1.ProjectorOnOff(false);
+        string returnString2 = engine2.ProjectorOnOff(false);
+
+        Log($"Power OFF Sent - (1) {returnString1} (2) {returnString2}");
     }
 
     private void ButtonLEDOn_Click(object sender, EventArgs e)
     {
-        string returnString = engine.LEDOnOff(true);
-        Log($"LED ON Sent - {returnString}");
+        string returnString1 = engine1.LEDOnOff(true);
+        string returnString2 = engine2.LEDOnOff(true);
+
+        Log($"LED ON Sent - (1) {returnString1} (2) {returnString2}");
     }
 
     private void ButtonLEDOff_Click(object sender, EventArgs e)
     {
-        string returnString = engine.LEDOnOff(false);
-        Log($"LED OFF Sent - {returnString}");
+        string returnString1 = engine1.LEDOnOff(false);
+        string returnString2 = engine2.LEDOnOff(false);
+
+        Log($"LED OFF Sent - (1) {returnString1} (2) {returnString2}");
     }
 
     private void ButtonSetCurrent_Click(object sender, EventArgs e)
     {
         if (int.TryParse(TextBoxCurrent.Text, out int current))
         {
-            string returnString = engine.SetLEDCurrent(current);
-            Log($"Set Current to {current} - {returnString}");
+            string returnString1 = engine1.SetLEDCurrent(current);
+            string returnString2 = engine2.SetLEDCurrent(current);
+
+            Log($"Set Current to {current} - (1) {returnString1} (2) {returnString2}");
         }
         else
         {
@@ -145,7 +191,10 @@ public partial class AnhuaEngineController : Form
     {
         if (int.TryParse(TextBoxFanSpeed1.Text, out int s))
         {
-            string returnString = engine.SetFanSpeed(1, s); Log($"Set Fan1: {s}% - {returnString}");
+            string returnString1 = engine1.SetFanSpeed(1, s);
+            string returnString2 = engine2.SetFanSpeed(1, s);
+
+            Log($"Set Fan1: {s}% - (1) {returnString1} (2) {returnString2}");
         }
     }
 
@@ -153,7 +202,10 @@ public partial class AnhuaEngineController : Form
     {
         if (int.TryParse(TextBoxFanSpeed2.Text, out int s))
         {
-            string returnString = engine.SetFanSpeed(2, s); Log($"Set Fan2: {s}% - {returnString}");
+            string returnString1 = engine1.SetFanSpeed(2, s);
+            string returnString2 = engine2.SetFanSpeed(2, s);
+
+            Log($"Set Fan2: {s}% - (1) {returnString1} (2) {returnString2}");
         }
     }
 
@@ -161,7 +213,10 @@ public partial class AnhuaEngineController : Form
     {
         if (int.TryParse(TextBoxFanSpeed3.Text, out int s))
         {
-            string returnString = engine.SetFanSpeed(3, s); Log($"Set Fan3: {s}% - {returnString}");
+            string returnString1 = engine1.SetFanSpeed(3, s);
+            string returnString2 = engine2.SetFanSpeed(3, s);
+
+            Log($"Set Fan3: {s}% - (1) {returnString1} (2) {returnString2}");
         }
     }
 
@@ -171,8 +226,10 @@ public partial class AnhuaEngineController : Form
         {
             if (mode >= 0 && mode <= 3)
             {
-                string returnString = engine.SetFlipPicture(mode);
-                Log($"Set Rotation Mode: {mode} - {returnString}");
+                string returnString1 = engine1.SetFlipPicture(mode);
+                string returnString2 = engine2.SetFlipPicture(mode);
+
+                Log($"Set Rotation Mode: {mode} - (1) {returnString1} (2) {returnString2}");
             }
         }
     }
@@ -192,7 +249,8 @@ public partial class AnhuaEngineController : Form
             ButtonStart.Text = "Start"; // 버튼 텍스트 원상복구
 
             // 안전을 위해 중지 시 LED를 확실히 끔
-            engine.LEDOnOff(false);
+            engine1.LEDOnOff(false);
+            engine2.LEDOnOff(false);
             return;
         }
 
@@ -223,6 +281,8 @@ public partial class AnhuaEngineController : Form
         int periodMs = period * 1000;
         int onTimeMs = onTime * 1000;
 
+        CreateLogFile(); // 로그 파일 생성
+
         _cts = new CancellationTokenSource(); // 새로운 취소 토큰 생성
 
         try
@@ -247,7 +307,8 @@ public partial class AnhuaEngineController : Form
             _cts = null;
 
             // 루프 종료 후 안전하게 LED 끄기
-            engine.LEDOnOff(false);
+            engine1.LEDOnOff(false);
+            engine2.LEDOnOff(false);
         }
     }
 
@@ -256,24 +317,112 @@ public partial class AnhuaEngineController : Form
     {
         int offTimeMs = periodMs - onTimeMs;
 
+        UInt128 loopCounter = 0;
+        string currentTime;
+
+        string returnStr1, returnStr2;
+
         // 취소 요청이 들어오기 전까지 무한 반복
         while (!token.IsCancellationRequested)
         {
+            currentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
             // 1. LED 켜기
-            engine.LEDOnOff(true);
+            returnStr1 = engine1.LEDOnOff(true);
+            returnStr2 = engine2.LEDOnOff(true);
+            WriteLogFile($"{currentTime} - ({loopCounter}) LED ON - {returnStr1}, {returnStr2}");
+
             // On 시간만큼 대기 (취소 토큰 감지 포함)
             await Task.Delay(onTimeMs, token);
 
             // 2. LED 끄기
-            engine.LEDOnOff(false);
+            engine1.LEDOnOff(false);
+            engine2.LEDOnOff(false);
+            WriteLogFile($"{currentTime} - ({loopCounter}) LED OFF - {returnStr1}, {returnStr2}");
+
             // Off 시간만큼 대기 (취소 토큰 감지 포함)
             await Task.Delay(offTimeMs, token);
+
+            loopCounter++;
+        }
+    }
+
+    public void CreateLogFile()
+    {
+        string appPath = AppDomain.CurrentDomain.BaseDirectory;
+        filePath = Path.Combine(appPath, "EventLog_" + DateTime.Now.ToString("yyyyMMdd_HHmmss")) + ".txt";
+
+        try
+        {
+            using FileStream fs = new(filePath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+        }
+        catch (IOException ex)
+        {
+            Console.WriteLine($"Failed to create event log file: {ex.Message}");
+        }
+    }
+
+    public void WriteLogFile(string textLine)
+    {
+        if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
+            CreateLogFile();
+
+        try
+        {
+            // --- 파일 크기 검사 로직 (시작) ---
+            bool createNewFile = false;
+
+            if (string.IsNullOrEmpty(filePath))
+            {
+                createNewFile = true; // 파일 경로가 아예 없음 (초기 실행)
+            }
+            else
+            {
+                FileInfo fileInfo = new(filePath);
+                if (!fileInfo.Exists)
+                {
+                    createNewFile = true; // 파일이 (삭제되는 등) 존재하지 않음
+                }
+                // 파일 크기가 최대 크기 초과
+                else if (fileInfo.Length > maxFileSizeInKiloBytes)
+                {
+                    createNewFile = true;
+                }
+            }
+
+            // 새 파일이 필요하면 생성
+            if (createNewFile)
+            {
+                CreateLogFile(); // 이 메서드가 'filePath'를 새 경로로 업데이트합니다.
+            }
+            // --- 파일 크기 검사 로직 (끝) ---
+
+
+            // 'filePath'는 이제 유효하거나 새로 생성된 경로임
+            using FileStream fileStream = new(filePath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+            using StreamWriter streamWriter = new(fileStream, new UTF8Encoding(true))
+            {
+                AutoFlush = true
+            };
+
+            // LogMessage에서 TrimEnd()로 NewLine을 제거했으므로 WriteLine 사용
+            streamWriter.WriteLine(textLine);
+        }
+        catch (IOException ex)
+        {
+            Console.WriteLine($"Failed to write event log: {ex.Message}");
+        }
+        catch (Exception ex) // FileInfo 등 다른 예외 처리
+        {
+            Console.WriteLine($"Unexpected error in WriteEventLogFile: {ex.Message}");
         }
     }
 }
 
 public class AnhuaEngine
 {
+    // 모듈명: DF78 기준
+
     private SerialPort serialPort;
 
     public AnhuaEngine()
@@ -445,5 +594,42 @@ public class AnhuaEngine
     {
         string cmd = $"CM+SPJF={flipCommand}";
         return SendCommand(cmd);
+    }
+
+    // 6. 상태 확인 (Status Check)
+    public string GetStatus(int component)
+    {
+        // component별 의미와 기대할 수 있는 리턴값
+        // (0) Power On(1)/Off(0)
+        // (1) LED On(1)/Off(0)
+        // (2) Rotation: (0) Front project (1) Lifting PLifting project (2) Lifting Back project (3) Back project
+        // (3) LED Current: 0~1023
+        // (4) Fan speed (범위: 0~100) - LED Fan
+        // (5) Fan speed (범위: 0~100) - PCB 1 Fan
+        // (6) Fan speed (범위: 0~100) - PCB 2 Fan
+        // (무응답) 통신 오류
+
+        string cmd = $"CM+STAT={component}";
+        return SendCommand(cmd);
+    }
+
+    public double GetTemperatureLED()
+    {
+        string cmd = "CM+GTMP";
+        string response = SendCommand(cmd);
+        if (double.TryParse(response, out double value))
+            return value;
+        else
+            return double.NaN; // 오류 시 NaN 반환
+    }
+
+    public double GetTemperaturePCB()
+    {
+        string cmd = "CM+GTMB";
+        string response = SendCommand(cmd);
+        if (double.TryParse(response, out double value))
+            return value;
+        else
+            return double.NaN; // 오류 시 NaN 반환
     }
 }

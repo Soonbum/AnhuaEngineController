@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            ButtonAutoConnect = new Button();
             ButtonPowerOn = new Button();
             ButtonPowerOff = new Button();
             ButtonLEDOff = new Button();
@@ -42,9 +41,8 @@
             TextBoxRotation = new TextBox();
             ButtonSetRotation = new Button();
             RichTextBoxLog = new RichTextBox();
-            LabelPort = new Label();
-            ButtonConnect = new Button();
-            ComboBoxPorts = new ComboBox();
+            ButtonConnect1 = new Button();
+            ComboBoxPorts1 = new ComboBox();
             TextBoxFanSpeed3 = new TextBox();
             ButtonSetFanSpeed3 = new Button();
             ButtonLogClear = new Button();
@@ -54,18 +52,10 @@
             LabelOnTime = new Label();
             ButtonStart = new Button();
             TestPanel = new Panel();
+            ComboBoxPorts2 = new ComboBox();
+            ButtonConnect2 = new Button();
             TestPanel.SuspendLayout();
             SuspendLayout();
-            // 
-            // ButtonAutoConnect
-            // 
-            ButtonAutoConnect.Location = new Point(30, 14);
-            ButtonAutoConnect.Name = "ButtonAutoConnect";
-            ButtonAutoConnect.Size = new Size(104, 34);
-            ButtonAutoConnect.TabIndex = 6;
-            ButtonAutoConnect.Text = "Auto Connect";
-            ButtonAutoConnect.UseVisualStyleBackColor = true;
-            ButtonAutoConnect.Click += ButtonAutoConnect_Click;
             // 
             // ButtonPowerOn
             // 
@@ -187,32 +177,23 @@
             RichTextBoxLog.TabIndex = 31;
             RichTextBoxLog.Text = "";
             // 
-            // LabelPort
+            // ButtonConnect1
             // 
-            LabelPort.AutoSize = true;
-            LabelPort.Location = new Point(150, 24);
-            LabelPort.Name = "LabelPort";
-            LabelPort.Size = new Size(29, 15);
-            LabelPort.TabIndex = 32;
-            LabelPort.Text = "Port";
+            ButtonConnect1.Location = new Point(30, 14);
+            ButtonConnect1.Name = "ButtonConnect1";
+            ButtonConnect1.Size = new Size(104, 34);
+            ButtonConnect1.TabIndex = 33;
+            ButtonConnect1.Text = "Connect";
+            ButtonConnect1.UseVisualStyleBackColor = true;
+            ButtonConnect1.Click += ButtonConnect1_Click;
             // 
-            // ButtonConnect
+            // ComboBoxPorts1
             // 
-            ButtonConnect.Location = new Point(30, 54);
-            ButtonConnect.Name = "ButtonConnect";
-            ButtonConnect.Size = new Size(104, 34);
-            ButtonConnect.TabIndex = 33;
-            ButtonConnect.Text = "Connect";
-            ButtonConnect.UseVisualStyleBackColor = true;
-            ButtonConnect.Click += ButtonConnect_Click;
-            // 
-            // ComboBoxPorts
-            // 
-            ComboBoxPorts.FormattingEnabled = true;
-            ComboBoxPorts.Location = new Point(150, 61);
-            ComboBoxPorts.Name = "ComboBoxPorts";
-            ComboBoxPorts.Size = new Size(101, 23);
-            ComboBoxPorts.TabIndex = 34;
+            ComboBoxPorts1.FormattingEnabled = true;
+            ComboBoxPorts1.Location = new Point(150, 21);
+            ComboBoxPorts1.Name = "ComboBoxPorts1";
+            ComboBoxPorts1.Size = new Size(101, 23);
+            ComboBoxPorts1.TabIndex = 34;
             // 
             // TextBoxFanSpeed3
             // 
@@ -244,14 +225,14 @@
             // 
             // TextBoxPeriod
             // 
-            TextBoxPeriod.Location = new Point(15, 53);
+            TextBoxPeriod.Location = new Point(21, 47);
             TextBoxPeriod.Name = "TextBoxPeriod";
             TextBoxPeriod.Size = new Size(100, 23);
             TextBoxPeriod.TabIndex = 38;
             // 
             // TextBoxOnTime
             // 
-            TextBoxOnTime.Location = new Point(134, 53);
+            TextBoxOnTime.Location = new Point(140, 47);
             TextBoxOnTime.Name = "TextBoxOnTime";
             TextBoxOnTime.Size = new Size(100, 23);
             TextBoxOnTime.TabIndex = 39;
@@ -259,7 +240,7 @@
             // LabelPeriod
             // 
             LabelPeriod.AutoSize = true;
-            LabelPeriod.Location = new Point(36, 26);
+            LabelPeriod.Location = new Point(42, 20);
             LabelPeriod.Name = "LabelPeriod";
             LabelPeriod.Size = new Size(58, 15);
             LabelPeriod.TabIndex = 40;
@@ -268,7 +249,7 @@
             // LabelOnTime
             // 
             LabelOnTime.AutoSize = true;
-            LabelOnTime.Location = new Point(151, 26);
+            LabelOnTime.Location = new Point(157, 20);
             LabelOnTime.Name = "LabelOnTime";
             LabelOnTime.Size = new Size(66, 15);
             LabelOnTime.TabIndex = 41;
@@ -276,9 +257,9 @@
             // 
             // ButtonStart
             // 
-            ButtonStart.Location = new Point(250, 26);
+            ButtonStart.Location = new Point(262, 20);
             ButtonStart.Name = "ButtonStart";
-            ButtonStart.Size = new Size(195, 50);
+            ButtonStart.Size = new Size(183, 50);
             ButtonStart.TabIndex = 42;
             ButtonStart.Text = "Start";
             ButtonStart.UseVisualStyleBackColor = true;
@@ -291,23 +272,42 @@
             TestPanel.Controls.Add(TextBoxOnTime);
             TestPanel.Controls.Add(LabelOnTime);
             TestPanel.Controls.Add(LabelPeriod);
-            TestPanel.Location = new Point(34, 552);
+            TestPanel.Location = new Point(34, 540);
             TestPanel.Name = "TestPanel";
-            TestPanel.Size = new Size(459, 100);
+            TestPanel.Size = new Size(459, 88);
             TestPanel.TabIndex = 43;
+            // 
+            // ComboBoxPorts2
+            // 
+            ComboBoxPorts2.FormattingEnabled = true;
+            ComboBoxPorts2.Location = new Point(150, 61);
+            ComboBoxPorts2.Name = "ComboBoxPorts2";
+            ComboBoxPorts2.Size = new Size(101, 23);
+            ComboBoxPorts2.TabIndex = 45;
+            // 
+            // ButtonConnect2
+            // 
+            ButtonConnect2.Location = new Point(30, 54);
+            ButtonConnect2.Name = "ButtonConnect2";
+            ButtonConnect2.Size = new Size(104, 34);
+            ButtonConnect2.TabIndex = 44;
+            ButtonConnect2.Text = "Connect";
+            ButtonConnect2.UseVisualStyleBackColor = true;
+            ButtonConnect2.Click += ButtonConnect2_Click;
             // 
             // AnhuaEngineController
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(526, 682);
+            ClientSize = new Size(526, 653);
+            Controls.Add(ComboBoxPorts2);
+            Controls.Add(ButtonConnect2);
             Controls.Add(TestPanel);
             Controls.Add(ButtonLogClear);
             Controls.Add(TextBoxFanSpeed3);
             Controls.Add(ButtonSetFanSpeed3);
-            Controls.Add(ComboBoxPorts);
-            Controls.Add(ButtonConnect);
-            Controls.Add(LabelPort);
+            Controls.Add(ComboBoxPorts1);
+            Controls.Add(ButtonConnect1);
             Controls.Add(RichTextBoxLog);
             Controls.Add(TextBoxRotation);
             Controls.Add(ButtonSetRotation);
@@ -321,7 +321,6 @@
             Controls.Add(ButtonLEDOn);
             Controls.Add(ButtonPowerOff);
             Controls.Add(ButtonPowerOn);
-            Controls.Add(ButtonAutoConnect);
             Name = "AnhuaEngineController";
             Text = "AnhuaEngineController";
             TestPanel.ResumeLayout(false);
@@ -331,7 +330,6 @@
         }
 
         #endregion
-        private Button ButtonAutoConnect;
         private Button ButtonPowerOn;
         private Button ButtonPowerOff;
         private Button ButtonLEDOff;
@@ -345,9 +343,8 @@
         private TextBox TextBoxRotation;
         private Button ButtonSetRotation;
         private RichTextBox RichTextBoxLog;
-        private Label LabelPort;
-        private Button ButtonConnect;
-        private ComboBox ComboBoxPorts;
+        private Button ButtonConnect1;
+        private ComboBox ComboBoxPorts1;
         private TextBox TextBoxFanSpeed3;
         private Button ButtonSetFanSpeed3;
         private Button ButtonLogClear;
@@ -357,5 +354,7 @@
         private Label LabelOnTime;
         private Button ButtonStart;
         private Panel TestPanel;
+        private ComboBox ComboBoxPorts2;
+        private Button ButtonConnect2;
     }
 }
