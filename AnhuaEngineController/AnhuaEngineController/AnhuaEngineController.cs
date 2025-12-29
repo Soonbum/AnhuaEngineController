@@ -16,7 +16,7 @@ public partial class AnhuaEngineController : Form
 
     private readonly string folderPath;
     private string filePath = "";
-    private readonly long maxFileSizeInKiloBytes = 4096;
+    private readonly long maxFileSizeInKiloBytes = 4096 * 1024;
 
     public AnhuaEngineController()
     {
@@ -318,6 +318,8 @@ public partial class AnhuaEngineController : Form
         int offTimeMs = periodMs - onTimeMs;
 
         UInt128 loopCounter = 0;
+        UInt128 ReconnectCount1 = 0;
+        UInt128 ReconnectCount2 = 0;
         string currentTime;
 
         string returnStr1, returnStr2;
@@ -330,7 +332,25 @@ public partial class AnhuaEngineController : Form
             // 1. LED 켜기
             returnStr1 = engine1.LEDOnOff(true);
             returnStr2 = engine2.LEDOnOff(true);
+            Log($"{currentTime} - ({loopCounter}) LED ON - {returnStr1}, {returnStr2}");
             WriteLogFile($"{currentTime} - ({loopCounter}) LED ON - {returnStr1}, {returnStr2}");
+
+            // 만약 연결이 끊어지면 재접속 시도
+            if (!returnStr1.StartsWith("OK"))
+            {
+                engine1.Disconnect();
+                engine1.Connect(ComboBoxPorts1.SelectedItem.ToString());
+                Log($"{currentTime} - ({ReconnectCount1}) Reconnecting Engine 1...");
+                WriteLogFile($"{currentTime} - ({ReconnectCount1}) Reconnecting Engine 1...");
+            }
+
+            if (!returnStr2.StartsWith("OK"))
+            {
+                engine2.Disconnect();
+                engine2.Connect(ComboBoxPorts2.SelectedItem.ToString());
+                Log($"{currentTime} - ({ReconnectCount2}) Reconnecting Engine 2...");
+                WriteLogFile($"{currentTime} - ({ReconnectCount2}) Reconnecting Engine 2...");
+            }
 
             // On 시간만큼 대기 (취소 토큰 감지 포함)
             await Task.Delay(onTimeMs, token);
@@ -338,6 +358,7 @@ public partial class AnhuaEngineController : Form
             // 2. LED 끄기
             engine1.LEDOnOff(false);
             engine2.LEDOnOff(false);
+            Log($"{currentTime} - ({loopCounter}) LED OFF - {returnStr1}, {returnStr2}");
             WriteLogFile($"{currentTime} - ({loopCounter}) LED OFF - {returnStr1}, {returnStr2}");
 
             // Off 시간만큼 대기 (취소 토큰 감지 포함)
